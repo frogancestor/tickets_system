@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Support system</title>
+    <meta charset="utf-8" />
+</head>
+<body>
+    <h1>Авторизация</h1>
+    <form class="form_auth" action="login" method="post">
+        {% csrf_token %}
+        <p>Login: {{ login }}</p>
+        <p>Password: {{ password }}</p>
+    </form>
+</body>
+</html>

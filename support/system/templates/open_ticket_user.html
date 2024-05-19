@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/styles.css" type="text/css">
+    <title>Support system</title>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header__wrapper">
+                <div class="header-title__wrapper">
+                    <h1 class="header-title">Заявки</h1>
+                </div>
+                <nav class="header__nav">
+                    <ul class="navigation-bar">
+                        <li class="navigation-item">
+                            <a class="navigation-bar-link" href="http://127.0.0.1:8000/user-tickets">Мои заявки</a>
+                        </li>
+                        <li class="navigation-item">
+                            <a class="navigation-bar-link" href="http://127.0.0.1:8000/create-ticket">Создать</a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="header-user">
+                    <div class="username">Имя Фамилия</div>
+                    <div class="header__icon-profile">
+                        <?xml version="1.0" ?><svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="#fff" width="32" height="32"><defs><style>.cls-1{fill:none;}</style></defs><title/><g data-name="Layer 2" id="Layer_2"><path d="M16,29A13,13,0,1,1,29,16,13,13,0,0,1,16,29ZM16,5A11,11,0,1,0,27,16,11,11,0,0,0,16,5Z"/><path d="M16,17a5,5,0,1,1,5-5A5,5,0,0,1,16,17Zm0-8a3,3,0,1,0,3,3A3,3,0,0,0,16,9Z"/><path d="M25.55,24a1,1,0,0,1-.74-.32A11.35,11.35,0,0,0,16.46,20h-.92a11.27,11.27,0,0,0-7.85,3.16,1,1,0,0,1-1.38-1.44A13.24,13.24,0,0,1,15.54,18h.92a13.39,13.39,0,0,1,9.82,4.32A1,1,0,0,1,25.55,24Z"/></g><g id="frame"><rect class="cls-1" height="32" width="32"/></g></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <section class="application-user">
+            <div class="container">
+                <div class="application__wrapper">
+                    <!-- {% csrf_token %} -->
+                    <div class="create-app">
+                        <div class="input-text">
+                            <div class="input-title">Заголовок:</div>
+                            <div class="input-textmassage"></div>
+                        </div>
+                        <div class="input-text">
+                            <div class="input-title">Описание:</div>
+                            <div class="description-textarea"></div>
+                        </div>
+                        <div class="input-text">
+                            <div class="input-title">Приоритет:</div>
+                            <div class="input-textmassage"></div>
+                        </div>
+                        <div class="input-text">
+                            <div class="input-title">Статус:</div>
+                            <div class="input-textmassage"></div>
+                        </div>
+                        <div class="input-text">
+                            <div class="input-title">Приложенные файлы:</div>
+                            <div class="input-textmassage"></div>
+                        </div>
+                        <div class="app-form__buttons">
+                            <input type="reset" value="Редактировать" class="app-button">
+                            <input type="submit" value="Отправить" class="app-button">
+                        </div>
+                    </div>
+                    <!-- <p>{{ alert }}</p> -->
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+
+    </footer>
+</body>
+</html>
