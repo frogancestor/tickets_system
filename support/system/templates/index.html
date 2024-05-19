@@ -13,7 +13,7 @@
             <div class="auth-container">
                 <div class="authorization-form">
                     <h1 class="auth-title">Авторизация</h1>
-                    <form class="form_auth" action="login" method="post">
+                    <form class="form_auth" action="auth" method="post">
                         {% csrf_token %}
                         <input type="text" name="login" placeholder="Введите логин">
                         <input type="password" name="password" placeholder="Введите пароль">

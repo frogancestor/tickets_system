@@ -15,8 +15,9 @@ from .models import StrAttributeData
 from .models import TextAttributeData
 from .models import ListAttributeDataReference
 from .models import ListAttributeData
+from .models import AutorizatedPeople
 import json
-
+import uuid
 # Create your views here.
 
 
@@ -24,19 +25,26 @@ def autorisation_view(request):
     return render(request, "index.html")
 
 
+def chose_role_page_view(request):
+    return render(request, "chooserole.html")
+
+
 def post_authorisation(request):
     login = request.POST.get("login", "Undefined")
     password = request.POST.get("password", "1")
-    data = {"alert": ""}
+    data = {"alert": "", 'auth_token': ''}
     template_name = "index.html"
     sup_user = Credentials.objects.all().filter(login=login)
     # проверка на существование пользователя
     if sup_user:
         if sup_user[0].password == password:
-            data = {"login": login, "password": password}
-            # template_name = "result.html"
             user_id = sup_user[0].user
-            template_name = redirectPerson(checkUserInTables(user_id))
+            next_page = redirectPerson(checkUserInTables(user_id))
+            newAutorization = AutorizatedPeople(token=uuid.uuid4().__str__(), person=sup_user[0].user)
+            newAutorization.save()
+            data['auth_token'] = newAutorization.token
+            data['next_page'] = next_page
+            template_name = 'redir.html'
         else:
             data = {"alert": "Неправильный пароль"}
             template_name = "index.html"
@@ -47,7 +55,7 @@ def post_authorisation(request):
 
 
 def tickets_view(request):
-    selected_elements = {"categories": {}, "statuses": {}, "priorities": {}}
+    selected_elements = {"categories": {}, "statuses": {}, "priorities": {}, 'user': getUserFullName(request.COOKIES.get('auth_token'))}
     categories = Categories.objects.all()
     statuses = Status.objects.all()
     priorities = Priority.objects.all()
@@ -60,8 +68,7 @@ def tickets_view(request):
 
     for element in range(len(priorities)):
         selected_elements["priorities"][element] = priorities[element]
-    
-    print(selected_elements)
+
     return render(request, "tickets_page.html", context=selected_elements)
 
 
@@ -211,7 +218,8 @@ def get_user_ticket(request):
 
 
 def user_tickets(request):
-    return render(request, "userapp.html")
+    data = {'user': getUserFullName(request.COOKIES.get('auth_token'))}
+    return render(request, "userapp.html", context=data)
 
 
 def get_user_tickets_list(request):
@@ -271,17 +279,23 @@ def checkUserInTables(user_id):
         flag = 2
     elif suportsTable:
         flag = 3
-    print(usersTable)
-    print(suportsTable)
     return flag
 
 
 def redirectPerson(flag):
     redirect = ""
     if flag == 1:
-        redirect = "chooserole.html"
+        redirect = "chose-role"
     elif flag == 2:
-        redirect = "userapp.html"
+        redirect = "user-tickets"
     elif flag == 3:
-        redirect = "tickets_page.html"
+        redirect = "tickets"
     return redirect
+
+
+def getUserFullName(token):
+    result = {'name': 'none', 'second_name': 'none'}
+    userToken = AutorizatedPeople.objects.get(token=token)
+    result['name'] = userToken.person.name
+    result['second_name'] = userToken.person.surname
+    return result

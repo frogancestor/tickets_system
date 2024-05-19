@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+    <script>
+        document.cookie = 'auth_token={{ auth_token }}';
+        window.location.replace('http://127.0.0.1:8000/{{ next_page }}');
+    </script>
+</body>
+</html>

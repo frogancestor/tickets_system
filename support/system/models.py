@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import date, timedelta
 # Create your models here.
 
 
@@ -59,7 +60,7 @@ class CategorySupportAssociation(models.Model):
 
 
 class Credentials(models.Model):
-    login = models.CharField(max_length=20) #сделать unique поле
+    login = models.CharField(max_length=20, unique=True)
     password = models.CharField(max_length=20)
     user = models.ForeignKey(People, on_delete=models.CASCADE)
 
@@ -153,3 +154,9 @@ class ListAttributeData(models.Model):
 
     def __str__(self):
         return f"{self.attribute} - {self.data}"
+
+
+class AutorizatedPeople(models.Model):
+    token = models.CharField(max_length=128)
+    person = models.ForeignKey(People, on_delete=models.CASCADE)
+    expiration_date = models.DateField(default=date.today() + timedelta(days=5))

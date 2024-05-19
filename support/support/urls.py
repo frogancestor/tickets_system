@@ -20,8 +20,9 @@ from system import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.autorisation_view),
-    path('login', views.post_authorisation),
+    path('login', views.autorisation_view),
+    path('auth', views.post_authorisation),
+    path('chose-role', views.chose_role_page_view),
     path('tickets', views.tickets_view),
     path('create-ticket', views.user_create_ticket_page),
     path('get-user-ticket', views.get_user_ticket),
