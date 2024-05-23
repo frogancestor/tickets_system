@@ -75,4 +75,7 @@ function addCustomAttributes(attributes_json) {
     })
 }
 
-
+function logout() {
+    cookieStore.delete('auth_token')
+    console.log(document.cookie)
+}

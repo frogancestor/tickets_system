@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from system import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,5 +32,6 @@ urlpatterns = [
     path('tickets-list', views.tickets_list_view),
     path('get-user-tickets-list', views.get_user_tickets_list),
     path('get-category-custom-attribute', views.get_category_custom_attribute),
-    path('watch-ticket/<id>', views.open_ticket_support)
+    path('watch-ticket/<id>', views.open_ticket_support),
 ]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

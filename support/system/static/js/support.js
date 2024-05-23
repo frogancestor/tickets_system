@@ -121,15 +121,19 @@ function generateTicketsCards(tickets_json) {
     <div class="ticket-attribute">
         <a class="link-to-ticket" target="_blank" href="http://127.0.0.1:8000/watch-ticket/${ticket.id}">Открыть</a>
     </div>`
-        ticket['custom_atr'].forEach(custAtr => {
-            ticketAtr = document.createElement('div')
-            ticketAtr.className = 'ticket-attribute'
-            ticketAtr.innerHTML = `<div class="ticket-title">${custAtr.name}:</div>
-                                   <p class="ticket-content">${custAtr.data}</p>`
-            ticketWrapper.append(ticketAtr)
-        })
+        // ticket['custom_atr'].forEach(custAtr => {
+        //     ticketAtr = document.createElement('div')
+        //     ticketAtr.className = 'ticket-attribute'
+        //     ticketAtr.innerHTML = `<div class="ticket-title">${custAtr.name}:</div>
+        //                            <p class="ticket-content">${custAtr.data}</p>`
+        //     ticketWrapper.append(ticketAtr)
+        // })
         allTicketsWrapper.append(ticketWrapper);
     })
 }
 
 
+function logout() {
+    cookieStore.delete('auth_token')
+    console.log(document.cookie)
+}

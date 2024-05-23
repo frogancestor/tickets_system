@@ -41,13 +41,14 @@ function generateTicketsCards(tickets_json) {
                     <div class="user-ticket-title">Категория:</div>
                     <p class="user-ticket-content">${ticket.category}</p>
                 </div>
-                <div class="ticket-attribute">
-                    <div class="user-ticket-title">Приложения:</div>
-                    <p class="user-ticket-content">Содержимое</p>
-                </div>
             </div>`
             allTicketsWrapper.append(ticketWrapper);
             console.log(ticket)
         })
     })
+}
+
+function logout() {
+    cookieStore.delete('auth_token')
+    console.log(document.cookie)
 }

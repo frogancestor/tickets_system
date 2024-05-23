@@ -51,6 +51,13 @@ class SupportEmployers(models.Model):
         return f"{self.person}"
 
 
+class SupportAdmin(models.Model):
+    person = models.ForeignKey(People, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.person}"
+
+
 class CategorySupportAssociation(models.Model):
     category = models.ForeignKey(Categories, on_delete=models.CASCADE)
     support_employee = models.ForeignKey(SupportEmployers, on_delete=models.CASCADE)
@@ -93,8 +100,8 @@ class Ticket(models.Model):
 
 
 class Attachments(models.Model):
-    file_name = models.CharField(max_length=30)
-    file_extension = models.CharField(max_length=10)
+    file_name = models.CharField(max_length=100)
+    file_extension = models.CharField(max_length=20)
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
 
 

@@ -226,6 +226,12 @@ header {
     font-size: 15px;
 }
 
+.user-links {
+	display: flex;
+	flex-direction: row;
+	gap: 15px;
+}
+
 .username {
 	cursor: pointer;
 }
@@ -370,6 +376,11 @@ table td{
 	font-size: 20px;
 }
 
+.link-to-ticket {
+	color: cornflowerblue;
+	text-decoration: underline;
+}
+
 /*  usercreateticket  */
 
 .create_app {
@@ -404,13 +415,17 @@ table td{
 
 .ticket-attribute__wrapper {
 	margin-bottom: 25px;
-	display: flex;
-    justify-content: left;
 }
 
-/* .ticket-attribute {
+.input-title, .description-title {
+	font-weight: 600;
+	margin-bottom: 5px;
+}
 
-} */
+.input-text .priority, .input-text .files {
+	font-weight: 600;
+	margin-bottom: 5px;
+}
 
 .input-textmassage {
 	width: 550px;
@@ -480,4 +495,29 @@ table td{
 
 .user-ticket-title {
 	font-weight: 400;
+}
+
+/* open-ticket-support */
+
+.file-link {
+	color: cornflowerblue;
+	text-decoration: underline;
+}
+
+.files-icon {
+	width: 16px;
+	height: 16px;
+}
+
+.ticket-file-attribute {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+/* modal-window */
+
+.exit-link:hover {
+	color: cornflowerblue;
+	text-decoration: underline;
 }

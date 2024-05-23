@@ -35,3 +35,8 @@ function generateTicketsCards(tickets_json) {
         })
     })
 }
+
+function logout() {
+    cookieStore.delete('auth_token')
+    console.log(document.cookie)
+}
