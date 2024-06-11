@@ -33,5 +33,12 @@ urlpatterns = [
     path('get-user-tickets-list', views.get_user_tickets_list),
     path('get-category-custom-attribute', views.get_category_custom_attribute),
     path('watch-ticket/<id>', views.open_ticket_support),
+    path('open-ticket-user/<id>', views.open_ticket_user),
+    path('watch-ticket/<id>/chat/<chat_uuid>', views.chat_page_view),
+    path('get-chat-history', views.get_chat_history_view),
+    path('send-message', views.send_message),
+    path('change_ticket', views.change_ticket),
+    path('add-custom-atr', views.add_custom_atr_view),
+    path('create-custom-atr', views.create_custom_atr),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

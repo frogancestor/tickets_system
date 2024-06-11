@@ -43,29 +43,65 @@
                 <div class="application__wrapper">
                     <!-- {% csrf_token %} -->
                     <div class="create-app">
-                        <div class="input-text">
+                        <div class="ticket-attribute__wrapper">
                             <div class="input-title">Заголовок:</div>
-                            <div class="input-textmassage"></div>
+                            <div class="ticket-attribute">{{ title }}</div>
                         </div>
-                        <div class="input-text">
+                        <div class="ticket-attribute__wrapper">
                             <div class="input-title">Описание:</div>
-                            <div class="description-textarea"></div>
+                            <div class="ticket-attribute">{{ description }}</div>
                         </div>
-                        <div class="input-text">
+                        <div class="ticket-attribute__wrapper">
                             <div class="input-title">Приоритет:</div>
-                            <div class="input-textmassage"></div>
+                            <div class="ticket-attribute priority">{{ priority }}</div>
+                            <select id="priorities" class="priorities_list hidden" name="priorities">
+                                <option value="">-- Выберите приоритет --</option>
+                                {% for key, value in priorities.items %}
+                                    <option value={{ key }}>{{ value }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <div class="input-text">
+                        <div class="ticket-attribute__wrapper">
                             <div class="input-title">Статус:</div>
-                            <div class="input-textmassage"></div>
+                            <div class="ticket-attribute status">{{ status }}</div>
                         </div>
-                        <div class="input-text">
-                            <div class="input-title">Приложенные файлы:</div>
-                            <div class="input-textmassage"></div>
+                        <div class="ticket-attribute__wrapper">
+                            <div class="input-title">Категория:</div>
+                            <div class="ticket-attribute">{{ category }}</div>
                         </div>
-                        <div class="app-form__buttons">
-                            <input type="reset" value="Редактировать" class="app-button">
-                            <input type="submit" value="Отправить" class="app-button">
+                        <div class="ticket-attribute__wrapper">
+                            <div class="input-title">Пользователь:</div>
+                            <div class="ticket-attribute">{{ user }}</div>
+                        </div>
+                        <div class="ticket-attribute__wrapper">
+                            <div class="input-title">Саппорт:</div>
+                            <div class="ticket-attribute">{{ support_employee }}</div>
+                        </div>
+                        <div class="ticket-attribute__wrapper">
+                            <div class="input-title">Чат:</div>
+                            <div class="ticket-attribute">
+                                <a class="file-link" target="_blank" href="http://127.0.0.1:8000/watch-ticket/7/chat/33082d74-3d74-4fdb-a074-973cccb90cf8">Ссылка на чат</a>
+                            </div>
+                        </div>
+                        <div class="ticket-attribute__wrapper">
+                            {% if files != 0 %}
+                                <div class="input-title">Приложенные файлы:</div>
+                                {% for file in files %}
+                                    {% if file.ext == "png" or file.ext == "jpg" or file.ext == "jpeg" %}
+                                        <div class="ticket-file-attribute">
+                                            <img class="files-icon" src="../static/images/picture-icon.png">
+                                            <a class="file-link" target="_blank" href="../{{ file.full_name }}.{{ file.ext }}">{{ file.name }}.{{ file.ext }}</a>
+                                        </div>
+                                    {% elif file.ext == "txt" or file.ext == "docx" %}
+                                        <div class="ticket-file-attribute">
+                                            <img class="files-icon" src="../static/images/text-icon.png">
+                                            <a class="file-link" target="_blank" href="../{{ file.full_name }}.{{ file.ext }}">{{ file.name }}.{{ file.ext }}</a>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% elif files == 0 %}
+                                <div class="ticket-file-attribute">Файлы отсутствуют</div>
+                            {% endif %}
                         </div>
                     </div>
                     <!-- <p>{{ alert }}</p> -->

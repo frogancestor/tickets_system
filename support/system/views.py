@@ -18,11 +18,14 @@ from .models import ListAttributeData
 from .models import AutorizatedPeople
 from .models import Attachments
 from .models import SupportAdmin
+from .models import Chat
+from .models import Message
 import json
 import uuid
 import os
 from django.core.files.storage import default_storage
 from support.settings import MEDIA_ROOT, MEDIA_URL
+from datetime import timedelta
 # Create your views here.
 
 
@@ -65,14 +68,14 @@ def tickets_view(request):
     statuses = Status.objects.all()
     priorities = Priority.objects.all()
 
-    for element in range(len(categories)):
-        selected_elements["categories"][element] = categories[element]
+    for element in categories:
+        selected_elements["categories"][element.id] = element.category
 
-    for element in range(len(statuses)):
-        selected_elements["statuses"][element] = statuses[element]
+    for element in statuses:
+        selected_elements["statuses"][element.id] = element.status
 
-    for element in range(len(priorities)):
-        selected_elements["priorities"][element] = priorities[element]
+    for element in priorities:
+        selected_elements["priorities"][element.id] = element.priority
 
     return render(request, "tickets_page.html", context=selected_elements)
 
@@ -87,57 +90,14 @@ def tickets_list_view(request):
         if ticket_id == "":
             authorised_admin = SupportAdmin.objects.all().filter(person=authorised_person)
             if len(authorised_admin) == 1:
-                tickets = Ticket.objects.all()
+                tickets = Ticket.objects.all().filter(**filterTicketsList(request))
             else:
-                tickets = Ticket.objects.all().filter(support_employee=authorised_support)
+                tickets = Ticket.objects.all().filter(support_employee=authorised_support, **filterTicketsList(request))
         else:
             tickets = Ticket.objects.all().filter(id=ticket_id)
-        ticket_objects = {
-            "tickets": []
-        }
-        for ticket in tickets:
-            support = ""
-            if ticket.support_employee is not None:
-                support = ticket.support_employee.support_employee.__str__()
-            ticket_data = {
-                "id": ticket.id,
-                "title": ticket.title,
-                "description": ticket.description,
-                "user": ticket.user.person.__str__(),
-                "support": support,
-                "priority": ticket.priority.__str__(),
-                "status": ticket.status.__str__(),
-                "category": ticket.category.__str__(),
-                "custom_atr": []
-            }
-            categoryCustomAtr = CategoryCustomAttribute.objects.all().filter(category=ticket.category)
-            for attribute in categoryCustomAtr:
-                name = attribute.custom_attribute.name
-                atr_type = attribute.custom_attribute.typeOfAttribute.name
-                atrData = ''
-                if atr_type == "str":
-                    atrData = StrAttributeData.objects.all().filter(attribute=attribute.custom_attribute, ticket=ticket)
-                elif atr_type == 'text':
-                    atrData = TextAttributeData.objects.all().filter(attribute=attribute.custom_attribute, ticket=ticket)
-                elif atr_type == 'list':
-                    atrData = ListAttributeData.objects.all().filter(attribute=attribute.custom_attribute, ticket=ticket)
-
-                if len(atrData) > 0:
-                    if atr_type == 'list':
-                        atrData = atrData[0].data.data
-                    else:
-                        atrData = atrData[0].data
-                else:
-                    atrData = ''
-                ticket_data['custom_atr'].append({
-                    'name': name,
-                    'type': atr_type,
-                    'data': atrData
-                })
-            ticket_objects["tickets"].append(ticket_data)
-            print(ticket_objects)
-        else:
-            print("Ошибка с количеством User в функции tickets_list_view")
+        ticket_objects = collectTicketsData(tickets)
+    else:
+        print("Ошибка с количеством User в функции tickets_list_view")
     return HttpResponse(json.dumps(ticket_objects, ensure_ascii=False))
 
 
@@ -208,6 +168,8 @@ def get_user_ticket(request):
         status = Status.objects.all()[0]
         ticket = Ticket(title=title, description=description, user=user, priority=priority, status=status, category=category)
         ticket.save()
+        chat = Chat(ticket=ticket)
+        chat.save()
 
         for file in request.FILES.getlist('files'):
             file_name = default_storage.save(os.path.join(MEDIA_ROOT, file.name), file)
@@ -269,6 +231,7 @@ def get_user_tickets_list(request):
                 if ticket.support_employee is not None:
                     support = ticket.support_employee.support_employee.__str__()
                 ticket_data = {
+                    "id": ticket.id,
                     "title": ticket.title,
                     "description": ticket.description,
                     "support": support,
@@ -286,7 +249,43 @@ def get_user_tickets_list(request):
 
 
 def open_ticket_support(request, id):
-    data = {'person': getUserFullName(request.COOKIES.get('auth_token'))}
+    data = {'statuses': {}, 'priorities': {}, 'person': getUserFullName(request.COOKIES.get('auth_token'))}
+    ticket = Ticket.objects.get(id=id)
+    chat = ''
+    try:
+        chat = Chat.objects.all().filter(ticket=ticket)[0].chat_name
+    except:
+        pass
+    data["title"] = ticket.title
+    data["description"] = ticket.description
+    data["user"] = ticket.user.__str__()
+    data["support_employee"] = ticket.support_employee.__str__()
+    data["priority"] = ticket.priority.__str__()
+    data["status"] = ticket.status.__str__()
+    data["category"] = ticket.category.__str__()
+    data['files'] = []
+    data['chat_id'] = chat
+    data['ticket_id'] = ticket.id
+    files = Attachments.objects.all().filter(ticket=ticket)
+    for file in files:
+        data['files'].append({
+            'name': file.file_name.split('/')[-1],
+            'full_name': file.file_name,
+            'ext': file.file_extension
+        })
+    statuses = Status.objects.all()
+    priorities = Priority.objects.all()
+    for element in statuses:
+        data["statuses"][element.id] = element.__str__()
+
+    for element in priorities:
+        data["priorities"][element.id] = element.__str__()
+
+    return render(request, "open_ticket_support.html", context=data)
+
+
+def open_ticket_user(request, id):
+    data = {'statuses': {}, 'priorities': {}, 'person': getUserFullName(request.COOKIES.get('auth_token'))}
     ticket = Ticket.objects.get(id=id)
     data["title"] = ticket.title
     data["description"] = ticket.description
@@ -303,8 +302,105 @@ def open_ticket_support(request, id):
             'full_name': file.file_name,
             'ext': file.file_extension
         })
+    statuses = Status.objects.all()
+    priorities = Priority.objects.all()
+    for element in statuses:
+        data["statuses"][element.id] = element.__str__()
 
-    return render(request, "open_ticket_support.html", context=data)
+    for element in priorities:
+        data["priorities"][element.id] = element.__str__()
+
+    return render(request, "open_ticket_user.html", context=data)
+
+
+def chat_page_view(request, id, chat_uuid):
+    data = {'person': getUserFullName(request.COOKIES.get('auth_token'))}
+    return render(request, "chat_page.html", context=data)
+
+
+def get_chat_history_view(request):
+    chat_uuid = request.GET.get('chat', '')
+    result = {'messages':[]}
+    if chat_uuid != '':
+        chat = Chat.objects.all().filter(chat_name=chat_uuid)
+        if len(chat) == 1:
+            messages = Message.objects.all().filter(chat=chat[0])
+            for element in messages:
+                result["messages"].append({
+                    'sender': f'{element.sender.name} {element.sender.surname}',
+                    'datetime': str(element.date_time + timedelta(hours=3)),
+                    'message': element.message
+                })
+
+    return HttpResponse(json.dumps(result, ensure_ascii=False))
+
+
+def send_message(request):
+    post_data = json.loads(request.body.decode('utf-8'))
+    authorised_person_token = request.COOKIES.get('auth_token')
+    authorised_person = AutorizatedPeople.objects.get(token=authorised_person_token).person
+    chat_uuid = post_data.get('chat', '')
+    message_text = post_data.get('message', '')
+    print(f'chat: {chat_uuid}')
+    print(f'message: {message_text}')
+    if chat_uuid != '' and message_text != '':
+        chat = Chat.objects.all().filter(chat_name=chat_uuid)
+        if len(chat) == 1:
+            message = Message(chat=chat[0], sender=authorised_person, message=message_text)
+            message.save()
+
+    return HttpResponse(json.dumps({'status': 'ok'}))
+
+
+def change_ticket(request):
+    post_data = json.loads(request.body.decode('utf-8'))
+    id_priority = post_data.get("priority")
+    priority = Priority.objects.all().filter(id=id_priority)[0]
+    id_status = post_data.get("status")
+    status = Status.objects.all().filter(id=id_status)[0]
+    id_ticket = post_data.get("ticket")
+    ticket = Ticket.objects.filter(id=id_ticket)
+    if id_priority != 0 and id_status != 0:
+        ticket.update(priority=priority, status=status)
+    elif id_priority != 0:
+        ticket.update(priority=priority)
+    elif id_status != 0:
+        ticket.update(status=status)
+    else:
+        print('в функции change_ticket что-то пошло не так')
+    return HttpResponse(json.dumps({'status': 'ok'}))
+
+
+def add_custom_atr_view(request):
+    data = {'person': getUserFullName(request.COOKIES.get('auth_token')), 'categories': {}, 'custom_atr_types': {}}
+    categories = Categories.objects.all()
+    custom_atr_types = CustomAttributeType.objects.all()
+    for element in categories:
+        data["categories"][element.id] = element.__str__()
+    for element in custom_atr_types:
+        data["custom_atr_types"][element.id] = element.__str__()
+
+    return render(request, "create_custom_atr.html", context=data)
+
+
+def create_custom_atr(request):
+    post_data = json.loads(request.body.decode('utf-8'))
+    name = post_data.get("name")
+    id_customType = post_data.get("customType")
+    customType = CustomAttributeType.objects.all().filter(id=id_customType)[0]
+    id_category = post_data.get("category")
+    category = Categories.objects.all().filter(id=id_category)[0]
+    el_list = post_data.get("list")
+    newCustomAttribute = CustomAttribute(name=name, typeOfAttribute=customType)
+    newCustomAttribute.save()
+    newCategoryAttributeAssoc = CategoryCustomAttribute(category=category, custom_attribute=newCustomAttribute)
+    newCategoryAttributeAssoc.save()
+    if customType.name == 'list':
+        for element in el_list:
+            newAtrReference = ListAttributeDataReference(data=element, attribute=newCustomAttribute)
+            newAtrReference.save()
+    print(name, customType, category, el_list)
+    return HttpResponse(json.dumps({'status': 'ok'}))
 
 
 # ======================================================
@@ -341,3 +437,81 @@ def getUserFullName(token):
     result['name'] = userToken.person.name
     result['second_name'] = userToken.person.surname
     return result
+
+
+def filterTicketsList(request):
+    result = {}
+
+    categories = request.GET.get('categories', '')
+    priorities = request.GET.get('priorities', '')
+    statuses = request.GET.get('statuses', '')
+    if categories != '':
+        categories = categories.split('_')
+        categories = tuple(categories)
+        search_categories = Categories.objects.all().filter(id__in=categories)
+        result['category__in'] = tuple(search_categories)
+    else:
+        print("len of categories is 0")
+    if priorities != '':
+        priorities = priorities.split('_')
+        priorities = tuple(priorities)
+        search_priorities = Priority.objects.all().filter(id__in=priorities)
+        result['priority__in'] = tuple(search_priorities)
+    else:
+        print("len of priorities is 0")
+    if statuses != '':
+        statuses = statuses.split('_')
+        statuses = tuple(statuses)
+        search_statuses = Status.objects.all().filter(id__in=statuses)
+        result['status__in'] = tuple(search_statuses)
+    else:
+        print("len of statuses is 0")
+    # print(result)
+    return result
+
+
+def collectTicketsData(tickets):
+    ticket_objects = {
+        "tickets": []
+    }
+    for ticket in tickets:
+        support = ""
+        if ticket.support_employee is not None:
+            support = ticket.support_employee.support_employee.__str__()
+        ticket_data = {
+            "id": ticket.id,
+            "title": ticket.title,
+            "description": ticket.description,
+            "user": ticket.user.person.__str__(),
+            "support": support,
+            "priority": ticket.priority.__str__(),
+            "status": ticket.status.__str__(),
+            "category": ticket.category.__str__(),
+            "custom_atr": []
+        }
+        categoryCustomAtr = CategoryCustomAttribute.objects.all().filter(category=ticket.category)
+        for attribute in categoryCustomAtr:
+            name = attribute.custom_attribute.name
+            atr_type = attribute.custom_attribute.typeOfAttribute.name
+            atrData = ''
+            if atr_type == "str":
+                atrData = StrAttributeData.objects.all().filter(attribute=attribute.custom_attribute, ticket=ticket)
+            elif atr_type == 'text':
+                atrData = TextAttributeData.objects.all().filter(attribute=attribute.custom_attribute, ticket=ticket)
+            elif atr_type == 'list':
+                atrData = ListAttributeData.objects.all().filter(attribute=attribute.custom_attribute, ticket=ticket)
+
+            if len(atrData) > 0:
+                if atr_type == 'list':
+                    atrData = atrData[0].data.data
+                else:
+                    atrData = atrData[0].data
+            else:
+                atrData = ''
+            ticket_data['custom_atr'].append({
+                'name': name,
+                'type': atr_type,
+                'data': atrData
+            })
+        ticket_objects["tickets"].append(ticket_data)
+    return ticket_objects

@@ -1,5 +1,7 @@
 from django.db import models
-from datetime import date, timedelta
+from django import utils
+from datetime import date, timedelta, datetime
+import uuid
 # Create your models here.
 
 
@@ -147,7 +149,7 @@ class TextAttributeData(models.Model):
 
 
 class ListAttributeDataReference(models.Model):
-    data = models.CharField(max_length=30)
+    data = models.CharField(max_length=50)
     attribute = models.ForeignKey(CustomAttribute, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -167,3 +169,18 @@ class AutorizatedPeople(models.Model):
     token = models.CharField(max_length=128)
     person = models.ForeignKey(People, on_delete=models.CASCADE)
     expiration_date = models.DateField(default=date.today() + timedelta(days=5))
+
+
+class Chat(models.Model):
+    chat_name = models.CharField(max_length=36, default=uuid.uuid4().__str__(), unique=True)
+    ticket = models.OneToOneField(Ticket, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.chat_name} - {self.ticket}"
+
+
+class Message(models.Model):
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
+    sender = models.ForeignKey(People, on_delete=models.CASCADE)
+    date_time = models.DateTimeField(default=utils.timezone.now)
+    message = models.CharField(max_length=500)

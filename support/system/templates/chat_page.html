@@ -1,31 +1,25 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/css/styles.css" type="text/css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" type="text/css">
     <title>Support system</title>
 </head>
 <body>
+    <script>
+        const csrftoken = "{{csrf_token}}";
+    </script>
     <header>
         <div class="container">
             <div class="header__wrapper">
                 <div class="header-title__wrapper">
-                    <h1 class="header-title">Заявки</h1>
+                    <h1 class="header-title">Чат по заявке</h1>
                 </div>
-                <nav class="header__nav">
-                    <ul class="navigation-bar">
-                        <li class="navigation-item">
-                            <a class="navigation-bar-link" href="http://127.0.0.1:8000/user-tickets">Мои заявки</a>
-                        </li>
-                        <li class="navigation-item">
-                            <a class="navigation-bar-link" href="http://127.0.0.1:8000/create-ticket">Создать</a>
-                        </li>
-                    </ul>
-                </nav>
                 <div class="header-user">
                     <div class="user-links">
-                        <div class="username">{{ user.name }} {{ user.second_name }}</div>
+                        <div class="username">{{ person.name }} {{ person.second_name }}</div>
                         <div class="logout">
                             <a class="exit-link" onclick="logout()" href="/">Выход</a>
                         </div>
@@ -38,17 +32,29 @@
         </div>
     </header>
     <main>
-        <section class="applications-user">
-            <div class="container">
-                <div class="all-user-tickets__wrapper">
-
+        <section class="main-section">
+            <section class="chat-application">
+                <div class="container">
+                    <div class="chat__wrapper">
+                        {% csrf_token %}
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+            <section class="message-input">
+                <div class="container">
+                    <div class="message-input__wrapper">
+                        <textarea class="message-textarea" name="input-chat-message" placeholder="Введите сообщение"></textarea>
+                    </div>
+                    <div class="message-button__wrapper">
+                        <input type="submit" value="Отправить" class="message-button">
+                    </div>
+                </div>
+            </section>
+        </section>   
     </main>
     <footer>
-
+        
     </footer>
-    <script src="../static/js/user.js"></script>
+    <script src="{% static 'js/chat.js' %}"></script>
 </body>
 </html>

@@ -4,9 +4,12 @@ let selected_elements = {
     "priorities" : []
 }
 
+let ticketsJson = {}
+
 // search
 const input = document.querySelector('.mysearch');
 const cross = document.querySelector('.icon_cross');
+const searchBut = document.querySelector('.icon_search')
 
 // filter
 const category = document.querySelector('.filter-category');
@@ -17,14 +20,29 @@ const categories = document.querySelector('.categories');
 const statuses = document.querySelector('.statuses');
 const priorities = document.querySelector('.priorities');
 
+searchBut.onclick = function() {
+    filterRecords(input.value)
+}
+
 // search functions
 input.addEventListener("input", function (event) {
     cross.classList.add('active');
 })
 
+function filterRecords(searchStr){
+    filteredData = {'tickets': []}
+    ticketsJson.tickets.forEach(ticket => {
+        if (ticket.title.toLowerCase().includes(searchStr.toLowerCase()) || ticket.description.toLowerCase().includes(searchStr.toLowerCase()) || ticket.user.toLowerCase().includes(searchStr.toLowerCase())) {
+            filteredData.tickets.push(ticket)
+        }
+    })
+    generateTicketsCards(filteredData)
+}
+
 cross.onclick = function() {
     document.querySelector('.mysearch').value = '';
     cross.classList.remove('active');
+    getTickets('');
 }
 // filter functions
 category.onclick = function() {
@@ -41,8 +59,6 @@ priority.onclick = function() {
 
 const checkboxes = document.getElementsByName('attributes');
 
-console.log(checkboxes);
-
 checkboxes.forEach(checkbox => {
     checkbox.addEventListener('click', (e)=>{
         checkedAttributes(e.target);
@@ -58,25 +74,27 @@ function checkedAttributes(element) {
         index0fElement = selected_elements[key].indexOf(element.value);
         selected_elements[key].splice(index0fElement, 1);
     }
-    console.log(element.parentNode.parentNode.classList[0]);
-    console.log(selected_elements);
 }
 
-// function getSearchString(selected_elements) {
+const filter_button = document.querySelector('.filter-button');
+filter_button.onclick = function () {
+    let query = getSearchString(selected_elements);
+    getTickets(query);
+}
 
-// }
 
-// function placeSearchStrIntoDiv() {
+function getSearchString(selected_elements) {
+    let result = `?categories=${selected_elements['categories'].join('_')}&statuses=${selected_elements['statuses'].join('_')}&priorities=${selected_elements['priorities'].join('_')}`;
+    return result;
+}
 
-// }
-
-async function getTickets() {
-    let response = await fetch("http://127.0.0.1:8000/tickets-list");
+async function getTickets(query) {
+    let response = await fetch(`http://127.0.0.1:8000/tickets-list${query}`);
 
     if (response.ok) { // если HTTP-статус в диапазоне 200-299
     // получаем тело ответа
         let json = await response.json();
-        console.log(json);
+        ticketsJson = json;
         generateTicketsCards(json);
     }
     else {
@@ -84,10 +102,11 @@ async function getTickets() {
     }
 }
 
-getTickets();
+getTickets("");
 
 function generateTicketsCards(tickets_json) {
     let allTicketsWrapper = document.querySelector('.all-tickets__wrapper');
+    allTicketsWrapper.innerHTML = ''
     tickets_json["tickets"].forEach(ticket => {
         let ticketWrapper = document.createElement('div');
         ticketWrapper.className = "ticket__wrapper";
@@ -135,5 +154,4 @@ function generateTicketsCards(tickets_json) {
 
 function logout() {
     cookieStore.delete('auth_token')
-    console.log(document.cookie)
 }

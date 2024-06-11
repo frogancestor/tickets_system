@@ -38,7 +38,7 @@ function addCustomAttributes(attributes_json) {
         if (customAttribute.type == "str") {
             let newInput = document.createElement('input');
             newInput.type = "text";
-            newInput.className = "input-textmassage";
+            newInput.className = "input-textmessage";
             newInput.name = customAttribute.id;
             newLabel.append(newInput);
         }

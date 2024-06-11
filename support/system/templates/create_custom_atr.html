@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/styles.css" type="text/css">
+    <title>Support system</title>
+</head>
+<body>
+    <script>
+        const csrftoken = "{{csrf_token}}";
+    </script>
+    <header>
+        <div class="container">
+            <div class="header__wrapper">
+                <div class="header-title__wrapper">
+                    <h1 class="header-title">Заявки</h1>
+                </div>
+                <div class="header-user">
+                    <div class="user-links">
+                        <div class="username">{{ person.name }} {{ person.second_name }}</div>
+                        <div class="logout">
+                            <a class="exit-link" onclick="logout()" href="/">Выход</a>
+                        </div>
+                    </div>
+                    <div class="header__icon-profile">
+                        <?xml version="1.0" ?><svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="#fff" width="32" height="32"><defs><style>.cls-1{fill:none;}</style></defs><title/><g data-name="Layer 2" id="Layer_2"><path d="M16,29A13,13,0,1,1,29,16,13,13,0,0,1,16,29ZM16,5A11,11,0,1,0,27,16,11,11,0,0,0,16,5Z"/><path d="M16,17a5,5,0,1,1,5-5A5,5,0,0,1,16,17Zm0-8a3,3,0,1,0,3,3A3,3,0,0,0,16,9Z"/><path d="M25.55,24a1,1,0,0,1-.74-.32A11.35,11.35,0,0,0,16.46,20h-.92a11.27,11.27,0,0,0-7.85,3.16,1,1,0,0,1-1.38-1.44A13.24,13.24,0,0,1,15.54,18h.92a13.39,13.39,0,0,1,9.82,4.32A1,1,0,0,1,25.55,24Z"/></g><g id="frame"><rect class="cls-1" height="32" width="32"/></g></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        {{ id }}
+        <section class="application-user">
+            <div class="container">
+                <div class="application__wrapper">
+                    <!-- {% csrf_token %} -->
+                    <div class="create-app">
+                        <div class="ticket-attribute__wrapper">
+                            <div class="create-atr-title">Добавить атрибут к категории</div>
+                        </div>
+                        <div class="ticket-attribute__wrapper">
+                            <div class="input-title">Название атрибута:</div>
+                            <div class="ticket-attribute">
+                                <input type="text" class="input-atr-name" name="title">
+                            </div>
+                        </div>
+                        <div class="ticket-attribute__wrapper">
+                            <div class="input-title">Тип:</div>
+                            <select id="custom_atr" class="custom_list" name="custom_atr">
+                                <option value="">-- Выберите тип --</option>
+                                {% for key, value in custom_atr_types.items %}
+                                    <option value={{ key }}>{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="icon-plus"></div>
+                        </div>
+                        <div class="list-elements__wrapper">
+                        </div>
+                        <div class="ticket-attribute__wrapper">
+                            <div class="input-title">Категория:</div>
+                            <select id="categories" class="categories_list" name="categories">
+                                <option value="">-- Выберите категорию --</option>
+                                {% for key, value in categories.items %}
+                                    <option value={{ key }}>{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="ticket-attribute__wrapper">
+                            <div class="input-title">Существующие атрибуты данной категории:</div>
+                            <div class="ticket-attribute custom_atr">Отсутствуют</div>
+                            <table class="custom-atr-table hidden">
+                                <thead>
+                                    <tr>
+                                        <th>Название</th>
+                                        <th>Тип</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- <tr>
+                                        <td>Атрибут 1</td>
+                                        <td>Тип 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Атрибут 2</td>
+                                        <td>Тип 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Атрибут 3</td>
+                                        <td>Тип 3</td>
+                                    </tr> -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="app-form__buttons">
+                        <button class="app-button save-btn">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        
+    </footer>
+    <script src="../static/js/create_custom_atr.js"></script>
+</body>
+</html>
