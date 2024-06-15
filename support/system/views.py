@@ -23,6 +23,9 @@ from .models import Message
 import json
 import uuid
 import os
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
 from django.core.files.storage import default_storage
 from support.settings import MEDIA_ROOT, MEDIA_URL
 from datetime import timedelta
@@ -360,8 +363,11 @@ def change_ticket(request):
     status = Status.objects.all().filter(id=id_status)[0]
     id_ticket = post_data.get("ticket")
     ticket = Ticket.objects.filter(id=id_ticket)
+    user_email = ticket[0].user.person.email
+    print(user_email)
     if id_priority != 0 and id_status != 0:
         ticket.update(priority=priority, status=status)
+        send_email(user_email, 'Смена статуса заявки', f'Статус заявки {id_ticket} изменён на {status.status}')
     elif id_priority != 0:
         ticket.update(priority=priority)
     elif id_status != 0:
@@ -515,3 +521,22 @@ def collectTicketsData(tickets):
             })
         ticket_objects["tickets"].append(ticket_data)
     return ticket_objects
+
+def send_email(recipient, subject, email_text) -> None:
+    gmail_user = 'tickets.sup.sys@gmail.com'
+    gmail_password = 'bovp ltzw iqea kcey'
+
+    sent_from = 'tickets_support_system'
+    msg = MIMEText(email_text, 'plain', 'utf-8')
+    msg['Subject'] = Header(subject, 'utf-8')
+    msg['From'] = gmail_user
+    msg['To'] = recipient
+
+    try:
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.ehlo()
+        server.login(gmail_user, gmail_password)
+        server.sendmail(sent_from, [recipient], msg.as_string())
+        server.close()
+    except Exception as e:
+        print(e)
